@@ -1,7 +1,7 @@
 provider "aws" {
     //project = "ECS Deploy"
     region = var.region
-  profile = var.aws_profile
+    profile = var.aws_profile
 }
 //vpc 
 resource "aws_vpc" "tf_vpc" {

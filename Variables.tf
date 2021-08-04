@@ -6,6 +6,9 @@ variable "aws_profile" {
     type    = string
     default = "ayush"
 }
+
+//vpc varibales
+
 variable "vpc_nam" {
     type = string
     default = "myvpc"
@@ -47,4 +50,41 @@ variable "allowall" {
 variable "vpc_route_table_name" {
     type    = string
     default = "my_rt2"
+}
+
+//EC2 variables
+
+variable "ec2_name" {
+    type    = string
+    default = "test"
+}
+
+variable "ami_id" {
+    type    = string
+    default = "ami-0747bdcabd34c712a"
+}
+
+variable "instance_type" {
+    type    = string
+    default = "t2-micro"
+}
+
+variable "key_name" {
+    type    = string
+    default = "mykey"
+}
+
+variable "secgrp_name" {
+    type    = string
+    default = "testgrp"
+}
+
+variable "ebs_size" {
+    type    = number
+    default = 10
+}
+
+variable "instance_az" {
+    type    = string
+    default = "us-east-1a"
 }
