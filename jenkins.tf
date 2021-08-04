@@ -18,37 +18,15 @@ resource "aws_security_group" "allow_tls" {
   description = "Allow TLS inbound traffic"
   vpc_id      = aws_vpc.tf_vpc.id
 
-  ingress {
-    description      = "TLS from anywhere"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-  ingress {
-    description      = "ssh from anywhere"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "ssh"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-  ingress {
-    description      = "Http from anywhere"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "http"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
-  }
-  ingress {
-    description      = "Http from anywhere"
-    from_port        = 9532
-    to_port          = 9532
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-    ipv6_cidr_blocks = ["::/0"]
+dynamic "ingress" {
+    iterator = port
+    for_each = var.ingressrules
+    content {
+      from_port   = port.value
+      to_port     = port.value
+      protocol    = "TCP"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
   }
   egress {
     from_port        = 0
@@ -86,9 +64,47 @@ resource "aws_instance" "test" {
   associate_public_ip_address = true
   vpc_security_group_ids = [aws_security_group.allow_tls.id]
   key_name = aws_key_pair.kp.key_name
-  
+
+  provisioner "local-exec" {
+      command = "chmod 400 /home/ayush/Downloads/var.key_name}"
+  }
+  provisioner "remote-exec" {
+        connection {
+          # The default username for our AMI
+          user = "ubuntu"
+          host = "${self.public_ip}"
+          type     = "ssh"
+          private_key = "${file("/home/ayush/Downloads/var.key_name.pem")}"
+        }
+
+        inline = [
+          "sudo apt-get -y update",
+          "sudo apt-get -y install docker.io",
+          "sudo apt-get -y install docker-compose",
+          "sudo chmod 666 /var/run/docker.sock",
+          "sudo mkdir -p /opt/docker",
+          "sudo cp docker-compose.yml /opt/docker",
+          "cd /opt/docker && docker-compose up -d"
+        ]
+      }
+  /*user_data = <<-EOF
+                #! /bin/bash
+                sudo apt update
+                sudo apt install docker.io -y 
+                sudo apt install docker-compose -y
+                sudo chmod 666 /var/run/docker.sock
+                sudo mkdir -p /opt/docker
+                //sudo cp docker-compose.yml /opt/docker/
+                //cd /opt/docker
+                //sudo docker-compose up 
+                EOF*/
   
   tags = {
     Name = "test_instance"
   }
+}
+
+output "instance_ip" {
+  description = "The public ip for ssh access"
+  value       = aws_instance.test.public_ip
 }

@@ -79,6 +79,11 @@ variable "secgrp_name" {
     default = "testgrp"
 }
 
+variable "ingressrules" {
+  type    = list(number)
+  default = [80, 443, 22, 9532]
+}
+
 variable "ebs_size" {
     type    = number
     default = 10
