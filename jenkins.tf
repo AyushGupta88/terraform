@@ -1,9 +1,8 @@
-/*
+
 resource "tls_private_key" "pk" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
-*/
 resource "aws_key_pair" "kp" {
   //Create a "myKey" to AWS!!
   key_name   = var.key_name       
@@ -15,7 +14,7 @@ resource "aws_key_pair" "kp" {
   }
 }
 resource "aws_security_group" "allow_tls" {
-  name        = var.testgrp
+  name        = var.secgrp_name
   description = "Allow TLS inbound traffic"
   vpc_id      = aws_vpc.tf_vpc.id
 
@@ -64,31 +63,32 @@ resource "aws_security_group" "allow_tls" {
   }
 }
 
-resource "aws_ebs_volume" "test" {
+resource "aws_ebs_volume" "test_vol" {
   availability_zone = var.instance_az
   size              = var.ebs_size
   tags = {
-    Name = "testebs
+    Name = "test_ebs"
   }
 }
 
 resource "aws_volume_attachment" "ebs_att" {
   device_name = "/dev/sdh"
-  volume_id   = aws_ebs_volume.test.id
+  volume_id   = aws_ebs_volume.test_vol.id
   instance_id = aws_instance.test.id
 }
 
 resource "aws_instance" "test" {
   ami           = var.ami_id
   instance_type = var.instance_type
-  vpc_id = aws_vpc.tf_vpc.id
+  //vpc_id = aws_vpc.tf_vpc.id
   subnet_id = aws_subnet.tf_subnet.id
   availability_zone = var.instance_az
-  associate_public_ip_address = "true"
+  associate_public_ip_address = true
+  vpc_security_group_ids = [aws_security_group.allow_tls.id]
   key_name = aws_key_pair.kp.key_name
-  vpc_security_group_ids = aws_security_group.allow_tls.id
+  
   
   tags = {
-    Name = "Testinstance"
+    Name = "test_instance"
   }
 }
