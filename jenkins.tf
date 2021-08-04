@@ -1,14 +1,9 @@
-provider "aws" {
-    //project = "ECS Deploy"
-    region = var.region
-    profile = var.aws_profile
-}
-
+/*
 resource "tls_private_key" "pk" {
   algorithm = "RSA"
   rsa_bits  = 4096
 }
-
+*/
 resource "aws_key_pair" "kp" {
   //Create a "myKey" to AWS!!
   key_name   = var.key_name       
