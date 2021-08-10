@@ -69,9 +69,9 @@ variable "instance_type" {
     default = "t2.micro"
 }
 
-variable "key_name" {
+variable "keypair_name" {
     type    = string
-    default = "mykey"
+    default = "automation_server_key"
 }
 
 variable "secgrp_name" {
@@ -81,7 +81,7 @@ variable "secgrp_name" {
 
 variable "ingressrules" {
   type    = list(number)
-  default = [80, 443, 22, 9532]
+  default = [80, 443, 22, 9586]
 }
 
 variable "ebs_size" {
@@ -92,4 +92,19 @@ variable "ebs_size" {
 variable "instance_az" {
     type    = string
     default = "us-east-1a"
+}
+
+variable "source_path" {
+    type    = string
+    default = "/home/ayush/Desktop/terraform/ECSdeploy/new/jenkins"
+}
+
+variable "destination_path" {
+    type    = string
+    default   = "/opt/docker"
+}
+
+variable "user_name" {
+    type    = string
+    default   = "ubuntu"
 }

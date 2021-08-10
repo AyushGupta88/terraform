@@ -5,16 +5,12 @@ resource "tls_private_key" "pk" {
 }
 resource "aws_key_pair" "kp" {
   //Create a "myKey" to AWS!!
-  key_name   = var.key_name       
+  key_name   = var.keypair_name      
   public_key = tls_private_key.pk.public_key_openssh
 
   provisioner "local-exec" { 
   // Create a "Key.pem" to your computer!!
-    command = "echo '${tls_private_key.pk.private_key_pem}' > ./key.pem"
-    //command = "chmod 400 ./key.pem"
-  }
-    provisioner "local-exec" {
-    command = "chmod 400 ./'${var.key_name}'.pem"
+    command = "echo '${tls_private_key.pk.private_key_pem}' > ./${aws_key_pair.kp.key_name} .pem"
   }
 }
 //resource "null_resource" "change_permission" {
@@ -80,11 +76,11 @@ resource "aws_instance" "test" {
   provisioner "remote-exec" {
         connection {
           # The default username for our AMI
-          user = "ubuntu"
+          user = var.user_name
           host = "${self.public_ip}"
           type     = "ssh"
-          //private_key = tls_private_key.pk.public_key_openssh
-          private_key = "${file("/home/ayush/Desktop/terraform/ECSdeploy/new/key.pem")}"
+          private_key = tls_private_key.pk.private_key_pem
+          //private_key = "${file("/home/ayush/Desktop/terraform/ECSdeploy/new/key.pem")}"
         }
 
         inline = [
@@ -95,19 +91,39 @@ resource "aws_instance" "test" {
           "docker-compose --version",
           "sudo chmod 666 /var/run/docker.sock",
           "sudo mkdir -p /opt/docker",
-          "sudo chown -R ubuntu:ubuntu /opt/docker"
+          "sudo chown -R ubuntu:ubuntu /opt/docker",
+          "cd /opt/docker && ls -lah"
+
         ]
       }
   provisioner "file" {
-        source      = "/home/ayush/Desktop/ECSdeploy/new/docker-compose.yml"
-        destination = "/opt/docker/"
+        //source      = "/home/ayush/Desktop/terraform/ECSdeploy/new/jenkins"
+        //destination = "/opt/docker/"
+        source        = var.source_path
+        destination   = var.destination_path
 
         connection {
           type     = "ssh"
-          user     = "ubuntu"
-          private_key = "${file("/home/ayush/Desktop/terraform/ECSdeploy/new/key.pem")}"
+          user     = var.user_name
+          private_key = tls_private_key.pk.private_key_pem
+          //private_key = "${file("/home/ayush/Desktop/terraform/ECSdeploy/new/key.pem")}"
           host     = "${self.public_ip}"
         }
+      }
+      provisioner "remote-exec" {
+        connection {
+          # The default username for our AMI
+          user = var.user_name
+          host = "${self.public_ip}"
+          type     = "ssh"
+          private_key = tls_private_key.pk.private_key_pem
+          //private_key = "${file("/home/ayush/Desktop/terraform/ECSdeploy/new/key.pem")}"
+        }
+
+        inline = [
+          "cd /opt/docker/jenkins",
+          "sudo docker-compose up -d"
+        ]
       }
   /*user_data = <<-EOF
                 #! /bin/bash
