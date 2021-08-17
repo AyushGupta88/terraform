@@ -119,6 +119,8 @@ variable "user_name" {
 variable "cluster_name" {
     default = ["test"]
 }
+
+//RDS Variables
 variable "identifier" {
     type  = string
     default = "mytestdb"
