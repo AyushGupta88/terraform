@@ -5,12 +5,12 @@ resource "tls_private_key" "pk" {
 }
 resource "aws_key_pair" "kp" {
   //Create a "myKey" to AWS!!
-  key_name   = var.keypair_name      
+  key_name   = var.keypair_name[0]      
   public_key = tls_private_key.pk.public_key_openssh
 
   provisioner "local-exec" { 
   // Create a "Key.pem" to your computer!!
-    command = "echo '${tls_private_key.pk.private_key_pem}' > ./${aws_key_pair.kp.key_name} .pem"
+    command = "echo '${tls_private_key.pk.private_key_pem}' > ./${aws_key_pair.kp.key_name}.pem"
   }
 }
 //resource "null_resource" "change_permission" {
@@ -21,7 +21,7 @@ resource "aws_key_pair" "kp" {
 //  }
 //}
 resource "aws_security_group" "allow_tls" {
-  name        = var.secgrp_name
+  name        = var.secgrp_name[0]
   description = "Allow TLS inbound traffic"
   vpc_id      = aws_vpc.tf_vpc.id
 
@@ -59,11 +59,11 @@ resource "aws_ebs_volume" "test_vol" {
 resource "aws_volume_attachment" "ebs_att" {
   device_name = "/dev/sdh"
   volume_id   = aws_ebs_volume.test_vol.id
-  instance_id = aws_instance.test.id
+  instance_id = aws_instance.automation.id
 }
 
-resource "aws_instance" "test" {
-  ami           = var.ami_id
+resource "aws_instance" "automation" {
+  ami           = var.ami_id[0]
   instance_type = var.instance_type
   //vpc_id = aws_vpc.tf_vpc.id
   subnet_id = aws_subnet.tf_subnet.id
@@ -76,7 +76,7 @@ resource "aws_instance" "test" {
   provisioner "remote-exec" {
         connection {
           # The default username for our AMI
-          user = var.user_name
+          user = var.user_name[0]
           host = "${self.public_ip}"
           type     = "ssh"
           private_key = tls_private_key.pk.private_key_pem
@@ -104,7 +104,7 @@ resource "aws_instance" "test" {
 
         connection {
           type     = "ssh"
-          user     = var.user_name
+          user     = var.user_name[0]
           private_key = tls_private_key.pk.private_key_pem
           //private_key = "${file("/home/ayush/Desktop/terraform/ECSdeploy/new/key.pem")}"
           host     = "${self.public_ip}"
@@ -113,7 +113,7 @@ resource "aws_instance" "test" {
       provisioner "remote-exec" {
         connection {
           # The default username for our AMI
-          user = var.user_name
+          user = var.user_name[0]
           host = "${self.public_ip}"
           type     = "ssh"
           private_key = tls_private_key.pk.private_key_pem
@@ -125,24 +125,13 @@ resource "aws_instance" "test" {
           "sudo docker-compose up -d"
         ]
       }
-  /*user_data = <<-EOF
-                #! /bin/bash
-                sudo apt update
-                sudo apt install docker.io -y 
-                sudo apt install docker-compose -y
-                sudo chmod 666 /var/run/docker.sock
-                sudo mkdir -p /opt/docker
-                //sudo cp docker-compose.yml /opt/docker/
-                //cd /opt/docker
-                //sudo docker-compose up 
-                EOF*/
   
   tags = {
-    Name = "test_instance"
+    Name = var.ec2_name[0]
   }
 }
 
 output "instance_ip" {
   description = "The public ip for ssh access"
-  value       = aws_instance.test.public_ip
+  value       = aws_instance.automation.public_ip
 }

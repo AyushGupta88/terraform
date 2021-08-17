@@ -9,7 +9,7 @@ resource "aws_vpc" "tf_vpc" {
   instance_tenancy = "default"
   enable_dns_hostnames = var.vpc_dns_hostname
   tags = {
-    Name = var.vpc_nam
+    Name = var.vpc_name
   }
 }
 resource "aws_subnet" "tf_subnet" {

@@ -9,7 +9,7 @@ variable "aws_profile" {
 
 //vpc varibales
 
-variable "vpc_nam" {
+variable "vpc_name" {
     type = string
     default = "myvpc"
 }
@@ -26,11 +26,11 @@ variable "vpc_dns_hostname" {
 
 
 variable "subnet_cidr" {
-    default = [ "10.1.0.0/24" , "10.1.1.0/24" ]
+    default = [ "10.1.0.0/24" , "10.1.1.0/24", "10.1.2.0/24" ]
 }
 
 variable "availability_zone" {
-    default = [ "us-east-1a" , "us-east-1b" ]
+    default = [ "us-east-1a" , "us-east-1b" , "us-east-1c"]
 }
 
 variable "subnet_name" {
@@ -55,13 +55,11 @@ variable "vpc_route_table_name" {
 //EC2 variables
 
 variable "ec2_name" {
-    type    = string
-    default = "test"
+    default = [ "automation" , "application" ]
 }
 
 variable "ami_id" {
-    type    = string
-    default = "ami-0747bdcabd34c712a"
+    default = ["ami-0747bdcabd34c712a" , "ami-01453e60fc2aef316"]
 }
 
 variable "instance_type" {
@@ -70,13 +68,11 @@ variable "instance_type" {
 }
 
 variable "keypair_name" {
-    type    = string
-    default = "automation_server_key"
+    default = ["automation_server_key" , "application_server_key", "cluster_key"]
 }
 
 variable "secgrp_name" {
-    type    = string
-    default = "testgrp"
+    default = ["automationsecgrp" , "applicationsecgrp" , "clustersecgrp", "dbsecgrp"]
 }
 
 variable "ingressrules" {
@@ -84,6 +80,18 @@ variable "ingressrules" {
   default = [80, 443, 22, 9586]
 }
 
+variable "ingressrules2" {
+  type    = list(number)
+  default = [22]
+}
+variable "ingressrules3" {
+  type    = list(number)
+  default = [80, 443, 22] 
+}
+variable "ingressdb" {
+    type  = list(number)
+    default = [5432,22]
+}
 variable "ebs_size" {
     type    = number
     default = 10
@@ -105,6 +113,45 @@ variable "destination_path" {
 }
 
 variable "user_name" {
-    type    = string
-    default   = "ubuntu"
+    default   = ["ubuntu" , "any"]
+}
+
+variable "cluster_name" {
+    default = ["test"]
+}
+variable "identifier" {
+    type  = string
+    default = "mytestdb"
+}
+variable "engine" {
+    type  = string
+    default = "PostgreSQL"
+}
+variable "allocated_storage" {
+    type  = number
+    default = 10
+}
+variable "engine_version" {
+    type  = string
+    default = "13.3-R1"
+}
+variable "instance_class" {
+    type  = string
+    default = "db.t3.micro"
+}
+variable "initial_db_name" {
+    type = string
+    default ="test"
+}
+variable "master_username" {
+    type  = string
+    default = "postgres"
+}
+variable "master_pass" {
+    type  = string
+    default = "affhghjahd"
+}
+variable "parameter_group_name" {
+    type = string
+    default = "default.postgres13"
 }
