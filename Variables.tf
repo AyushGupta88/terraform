@@ -157,3 +157,8 @@ variable "parameter_group_name" {
     type = string
     default = "default.postgres13"
 }
+
+variable "ecrnames" {
+    type = list(string)
+    default = ["frontend","backend"]
+}
